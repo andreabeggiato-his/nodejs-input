@@ -73,6 +73,23 @@ const readKeystroke = async (prompt) => {
   return keyPressedPromise;
 }
 
+const readKeystrokeForever = (callback) => {
+  process.stdin.resume(); 
+  const keyPressHandler = (str, key) => {
+    if (key.ctrl && key.name === 'c') {
+      process.exit();
+    }
+    else {
+      callback(key);
+    }
+  }
+  process.stdin.on('keypress', keyPressHandler);
+  return () => {
+    process.stdin.off('keypress', keyPressHandler);
+    process.stdin.pause();
+  }
+}
+
 module.exports = {
   readInteger,
   readFloat,
@@ -81,4 +98,5 @@ module.exports = {
   readFloatArray,
   readStringArray,
   readKeystroke,
+  readKeystrokeForever,
 }
