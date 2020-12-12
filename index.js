@@ -1,4 +1,6 @@
 const readline = require('readline');
+readline.emitKeypressEvents(process.stdin);
+process.stdin.setRawMode(true);
 
 const readLinePromise = (prompt) => {
   const rl = readline.createInterface({
@@ -48,6 +50,29 @@ const readFloatArray = (prompt, separator = ',') => parse(
 
 const readStringArray = async (prompt, separator = ',') => (await readString(prompt)).split(separator);
 
+const readKeystroke = async (prompt) => {
+  if (prompt) {
+    process.stdout.write(`${prompt}: `);
+  }
+
+  const keyPressedPromise = new Promise((fulfill) => { 
+    process.stdin.resume(); 
+    const keyPressHandler = (str, key) => {
+      if (key.ctrl && key.name === 'c') {
+        process.exit();
+      }
+      else {
+        process.stdin.off('keypress', keyPressHandler);
+        process.stdin.pause();
+        fulfill(key);
+      }
+    }
+    process.stdin.on('keypress', keyPressHandler);
+  });
+
+  return keyPressedPromise;
+}
+
 module.exports = {
   readInteger,
   readFloat,
@@ -55,4 +80,5 @@ module.exports = {
   readIntegerArray,
   readFloatArray,
   readStringArray,
+  readKeystroke,
 }
